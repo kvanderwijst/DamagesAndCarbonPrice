@@ -1,3 +1,7 @@
+# Output files
+output/*.json
+output/*.html
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
