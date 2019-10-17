@@ -404,19 +404,22 @@ def write_json(outp, name):
 	with open(name+'.json', 'w') as outfile:
 		json_tricks.dump(outp,outfile)
 
-def parseRunName(params):
-    runname = params.obj.runname
-
+def replaceFlags(params, name):
     params_regex = re.compile(r'%([\w_]+)')
-    params_flags = params_regex.findall(runname)
+    params_flags = params_regex.findall(name)
     for flag in params_flags:
         if flag in params.default_params:
-            runname = runname.replace('%'+flag, str(params.default_params[flag]))
+            name = name.replace('%'+flag, str(params.default_params[flag]))
+    return name
+
+def parseRunName(params):
+    runname = replaceFlags(params, params.obj.runname)
+    shortname = replaceFlags(params, params.obj.shortname)
 
     filename = "output/" + runname.replace(' ', '_').replace('/','').replace('\\','').lower().replace('%time', '_' + str(int(time.time())))
     runname = runname.replace('%time', '')
 
-    return runname, filename
+    return runname, shortname, filename
 
 def plot_output(filename, inline=False):
     # Import JSON
@@ -435,8 +438,10 @@ def plot_output(filename, inline=False):
     return
 
 def export_output(o, save=True, plot=True, inline=False):
-    runname, filename = parseRunName(o['meta']['params'])
+    runname, shortname, filename = parseRunName(o['meta']['params'])
     o['meta']['title'] = runname
+    o['meta']['shorttitle'] = shortname
+
 
     if save:
         write_json(o, filename)

@@ -48,7 +48,8 @@ class Params:
 
             damage = "nodamage",
 
-            runname = "default"
+            runname = "default",
+            shortname = "default"
         )
 
         for key, value in kwargs.items():
