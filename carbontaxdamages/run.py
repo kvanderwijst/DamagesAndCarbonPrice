@@ -59,6 +59,13 @@ def full_run(params_input):
     def B_cumulative(t_i):
         return B_cumulative_values[t_i]
 
+
+    if params.relativeBudget:
+        absoluteBudget = B_cumulative(-1) * params.carbonbudget
+        params_input.default_params['absoluteBudget'] = absoluteBudget
+    else:
+        absoluteBudget = params.carbonbudget
+
     # @nb.njit([ f8(i8) ], fastmath=fastmath)
     # def B(t_i):
     #     t = t_values[t_i]
@@ -341,8 +348,8 @@ def full_run(params_input):
     calibrateTFP()
 
     reset()
-    if params.carbonbudget > 0:
-        setPenalty(params.carbonbudget)
+    if absoluteBudget > 0:
+        setPenalty(absoluteBudget)
 
 
     backwardInduction()

@@ -18,6 +18,7 @@ class Params:
             gamma = 1500.0,
 
             carbonbudget = 1000, # GtCO2
+            relativeBudget = False,
 
             progRatio = 0.82,
             minEmissions = -300,
