@@ -72,7 +72,7 @@ for SSP in ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']:
             'gamma': gamma
         })
 
-write_json(calibration3p0_0p82, "output/calibration1")
+write_json(calibration, "output/calibration1")
 
 ######
 # Without damages: calibrate, using beta=2.0
