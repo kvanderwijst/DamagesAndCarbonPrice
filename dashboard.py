@@ -26,7 +26,6 @@ import re
 outputs = {}
 
 def load_all():
-    print("Refreshing everything")
     filenames = glob.glob('output/*.json')
     if len(filenames) == 0:
         raise Exception("No files match the given pattern.")
@@ -56,23 +55,6 @@ def load_all():
 
 load_all()
 
-def plot(filename_pattern):
-    # Select files matching filename pattern
-    filenames = glob.glob('output/'+filename_pattern+'.json')
-    if len(filenames) == 0:
-        raise Exception("No files match the given pattern.")
-
-    print("Matched the following files: \n", filenames)
-
-    # Import the content of the selected files
-    outputs = []
-    for filename in filenames:
-        with open(filename) as fh:
-            outputs.append(json_tricks.load(fh, preserve_order=False))
-
-    # Create plots
-    colors = plotly.colors.DEFAULT_PLOTLY_COLORS
-    return outputs
 
 
 external_stylesheets = []
@@ -192,7 +174,7 @@ def damage_traces(outputs):
 
 
 def temp_traces(outputs):
-    return [go.Scatter(
+    traces = [go.Scatter(
         x=o['meta']['t_values_years'],
         y=o['temp'],
         name=o['meta']['shorttitle'],
@@ -201,6 +183,11 @@ def temp_traces(outputs):
         legendgroup=o['meta']['title'],
         line={'color': o['meta']['color']}
     ) for o in outputs]
+    if len(outputs) > 0:
+        max_temp = np.max([o['temp'][o['meta']['t_values_years'] <= 2100] for o in outputs])
+    else:
+        max_temp = None
+    return traces, max_temp
 
 
 def create_emission_and_price_plot(outputs):
@@ -218,14 +205,19 @@ def create_emission_and_price_plot(outputs):
     for trace in damage_traces(outputs):
         fig.add_trace(trace, 2, 1)
 
-    for trace in temp_traces(outputs):
+    traces, max_temp = temp_traces(outputs)
+    for trace in traces:
         fig.add_trace(trace, 2, 2)
 
     fig.update_layout(
         margin={'b': 15, 't': 40},
         hovermode='x',
         yaxis3={'tickformat': ',.1%'},
-        legend={'y': 0.0}
+        legend={'y': 0.0},
+        xaxis1={'range': [2015.0, 2100]},
+        xaxis2={'range': [2015.0, 2100]},
+        xaxis3={'range': [2015.0, 2100]},
+        xaxis4={'range': [2015.0, 2100]}, yaxis4={'range': [0.7, max_temp * 1.1]}
     )
     return fig
 
@@ -259,7 +251,7 @@ def create_economic_plots(outputs):
     for trace in economic_traces(outputs, 'K', 'dash'):
         fig.add_trace(trace, 1, 1)
 
-    fig.update_layout(margin={'b': 15, 't': 40, 'r': 350}, hovermode='x')
+    fig.update_layout(margin={'b': 15, 't': 40, 'r': 350}, hovermode='x', xaxis={'range': [2015, 2100]})
     return fig
 
 # def create_price_plot(outputs):
