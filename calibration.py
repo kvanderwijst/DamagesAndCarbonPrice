@@ -8,6 +8,12 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
+import json_tricks
+
+def write_json(outp, name):
+	with open(name+'.json', 'w') as outfile:
+		json_tricks.dump(outp,outfile)
+
 from carbontaxdamages.defaultparams import Params
 from carbontaxdamages.run import full_run_structured, export_output
 
@@ -65,6 +71,8 @@ for SSP in ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']:
             'beta': beta,
             'gamma': gamma
         })
+
+write_json(calibration3p0_0p82, "output/calibration1")
 
 ######
 # Without damages: calibrate, using beta=2.0
