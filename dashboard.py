@@ -186,9 +186,8 @@ def temp_traces(outputs):
     if len(outputs) > 0:
         max_temp = np.max([o['temp'][o['meta']['t_values_years'] <= 2100] for o in outputs])
     else:
-        max_temp = None
+        max_temp = np.nan
     return traces, max_temp
-
 
 def create_emission_and_price_plot(outputs):
 
