@@ -82,6 +82,13 @@ def full_run(params_input):
     ##########################
     ##########################
 
+    # Obtain calibrated value of gamma:
+    if params.useCalibratedGamma:
+        gamma = gamma_val(params.SSP, params.beta, params.progRatio, params.cost_level)
+        params_input.default_params['gamma'] = gamma
+    else:
+        gamma = params.gamma
+
     CE_min, CE_max = 0, B_cumulative(-1)
     CE_factor = (params.CE_values_num - 1.0) / (CE_max - CE_min)
     CE_values = np.linspace(CE_min, CE_max, params.CE_values_num)
@@ -137,11 +144,11 @@ def full_run(params_input):
 
     @nb.njit(f8(f8,f8), fastmath=fastmath)
     def MACinv(p, factor):
-        return MACinvGeneral(p, factor, params.beta, params.gamma)
+        return MACinvGeneral(p, factor, params.beta, gamma)
 
     @nb.njit(f8(f8,f8), fastmath=fastmath)
     def MACintegral(mEnd, factor):
-        return MACintegralGeneral(mEnd, factor, params.beta, params.gamma)
+        return MACintegralGeneral(mEnd, factor, params.beta, gamma)
 
     @nb.njit([ f8(i8,f8) ], fastmath=fastmath)
     def learningFactor(t_i, CE):

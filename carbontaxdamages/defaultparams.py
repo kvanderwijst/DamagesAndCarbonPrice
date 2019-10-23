@@ -16,6 +16,8 @@ class Params:
 
             beta = 2.0,
             gamma = 1500.0,
+            useCalibratedGamma = False,
+            cost_level = 'best',
 
             carbonbudget = 1000, # GtCO2
             relativeBudget = False,

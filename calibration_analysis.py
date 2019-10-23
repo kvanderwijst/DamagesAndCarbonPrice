@@ -140,7 +140,7 @@ for SSP in ['SSP1','SSP2','SSP3','SSP4','SSP5']:
             }
 
 gamma_values_df = pd.DataFrame(gamma_values).T.rename_axis(['SSP', 'beta', 'rho']).reset_index()
-gamma_values_df.to_csv("carbontaxdamages/gamma_values.csv", index=False)
+gamma_values_df.to_csv("carbontaxdamages/data/gamma_values.csv", index=False)
 
 
 def test_plot(SSP, beta, rho):

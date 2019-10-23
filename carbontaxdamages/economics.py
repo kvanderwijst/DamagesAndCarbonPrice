@@ -4,6 +4,10 @@
 
 import numpy as np
 import numba as nb
+import pandas as pd
+
+import importlib.resources as pkg_resources
+import carbontaxdamages.data
 
 f8 = nb.float64
 i8 = nb.int64
@@ -155,3 +159,24 @@ damages = {
     "damageTol2014": damageTol2014,
     "nodamage": nodamage
 }
+
+
+
+###########################
+##
+## Import calibrated values of gamma (abatement costs)
+##
+###########################
+
+gamma_values_df = pd.read_csv(pkg_resources.open_text(carbontaxdamages.data, "gamma_values.csv")).set_index(['SSP', 'beta', 'rho'])
+
+def gamma_val(SSP, beta, rho, cost_level):
+    try:
+        gamma = gamma_values_df.loc[SSP, beta, rho][cost_level]
+    except:
+        raise Exception("This combination of parameters has not been calibrated yet: ", SSP, beta, rho, cost_level)
+    return gamma
+
+
+
+#
