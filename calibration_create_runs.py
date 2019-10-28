@@ -44,10 +44,10 @@ if reality_check:
         consumptionBL = outputBL['consumption']
 
         for rho in [0.65, 0.82, 0.95]:
+			print(SSP, " rho: ", rho)
             for beta in [2.0, 3.0]:
                 for cost_level in ['best', 'low', 'high']:
                     for cb in np.linspace(0.1, 0.6, 6):
-                        gamma = 1500.0 # First approximation, will be fine-tuned later
                         output = full_run_structured(Params(
                             carbonbudget=cb, relativeBudget=True,
                             SSP=SSP, K_values_num=30,
@@ -69,7 +69,7 @@ if reality_check:
                             'cost_level': cost_level
                         })
 
-    write_json(calibration, "output/calibration_reality_check")
+    		write_json(calibration, "output/calibration_reality_check_"+SSP)
 
 
 else:
