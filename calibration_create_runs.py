@@ -38,38 +38,38 @@ if reality_check:
     # Variations: various SSPs, either npv(C) / npv(C_baseline) or npv(C_baseline - C), various progratios
     # And calibrate with min emission level?
 
-    calibration = []
-    for SSP in ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']:
-        outputBL = full_run_structured(Params(carbonbudget=0, damage="nodamage", SSP=SSP, K_values_num=20))
-        consumptionBL = outputBL['consumption']
+	calibration = []
+	for SSP in ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']:
+		outputBL = full_run_structured(Params(carbonbudget=0, damage="nodamage", SSP=SSP, K_values_num=20))
+		consumptionBL = outputBL['consumption']
 
-        for rho in [0.65, 0.82, 0.95]:
+		for rho in [0.65, 0.82, 0.95]:
 			print(SSP, " rho: ", rho)
-            for beta in [2.0, 3.0]:
-                for cost_level in ['best', 'low', 'high']:
-                    for cb in np.linspace(0.1, 0.6, 6):
-                        output = full_run_structured(Params(
-                            carbonbudget=cb, relativeBudget=True,
-                            SSP=SSP, K_values_num=30,
-                            useCalibratedGamma=True, cost_level=cost_level, progRatio=rho, beta=beta
-                        ))
+			for beta in [2.0, 3.0]:
+				for cost_level in ['best', 'low', 'high']:
+					for cb in np.linspace(0.1, 0.6, 6):
+						output = full_run_structured(Params(
+							carbonbudget=cb, relativeBudget=True,
+							SSP=SSP, K_values_num=30,
+							useCalibratedGamma=True, cost_level=cost_level, progRatio=rho, beta=beta
+						))
 
-                        t_values = output['meta']['t_values']
-                        consumption = output['consumption']
-                        consumptionLoss1 = npv((consumptionBL - consumption) / consumptionBL, t_values)
-                        consumptionLoss2 = (npv(consumptionBL - consumption, t_values)) / npv(consumptionBL, t_values)
+						t_values = output['meta']['t_values']
+						consumption = output['consumption']
+						consumptionLoss1 = npv((consumptionBL - consumption) / consumptionBL, t_values)
+						consumptionLoss2 = (npv(consumptionBL - consumption, t_values)) / npv(consumptionBL, t_values)
 
-                        calibration.append({
-                            'SSP': SSP,
-                            'carbonbudget': cb,
-                            'consumptionLoss1': consumptionLoss1,
-                            'consumptionLoss2': consumptionLoss2,
-                            'rho': rho,
-                            'beta': beta,
-                            'cost_level': cost_level
-                        })
+						calibration.append({
+							'SSP': SSP,
+							'carbonbudget': cb,
+							'consumptionLoss1': consumptionLoss1,
+							'consumptionLoss2': consumptionLoss2,
+							'rho': rho,
+							'beta': beta,
+							'cost_level': cost_level
+						})
 
-    		write_json(calibration, "output/calibration_reality_check_"+SSP)
+		write_json(calibration, "output/calibration_reality_check_"+SSP)
 
 
 else:
