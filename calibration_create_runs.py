@@ -110,3 +110,41 @@ else:
                     })
 
     write_json(calibration, "output/calibration2")
+
+
+
+################## Check linearity of NPV in gamma
+#
+# SSP = 'SSP5'
+# rho = 0.95
+# beta = 3.0
+# cb = 0.1
+# outputBL = full_run_structured(Params(carbonbudget=0, damage="nodamage", SSP=SSP, K_values_num=20))
+# consumptionBL = outputBL['consumption']
+# calibration2 = []
+# for gamma in [750, 1500, 2000, 3000]:
+#     output = full_run_structured(Params(
+#         carbonbudget=cb, relativeBudget=True,
+#         SSP=SSP, K_values_num=30,
+#         gamma=gamma, progRatio=rho, beta=beta
+#     ))
+#
+#     t_values = output['meta']['t_values']
+#     consumption = output['consumption']
+#     consumptionLoss1 = npv((consumptionBL - consumption) / consumptionBL, t_values)
+#     consumptionLoss2 = (npv(consumptionBL - consumption, t_values)) / npv(consumptionBL, t_values)
+#
+#     calibration2.append({
+#         'SSP': SSP,
+#         'carbonbudget': cb,
+#         'consumptionLoss1': consumptionLoss1,
+#         'consumptionLoss2': consumptionLoss2,
+#         'rho': rho,
+#         'beta': beta,
+#         'gamma': gamma
+#     })
+#
+#
+# import plotly.express as px
+# test_df = pd.DataFrame(calibration2)
+# px.scatter(test_df, x="gamma", y="consumptionLoss1").update_traces(mode='lines')

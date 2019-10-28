@@ -42,13 +42,11 @@ with open("output/calibration/calibration.json", 'r') as fh:
 calibration_df = pd.DataFrame(calibration_read)
 calibration_df["rho"] = calibration_df["rho"].astype(str)
 calibration_df["beta"] = calibration_df["beta"].astype(str)
-px.scatter(calibration_df, x="carbonbudget", y="consumptionLoss1", color="SSP", facet_col="beta", facet_row="rho")
-
-
+px.scatter(calibration_df, x="carbonbudget", y="consumptionLoss2", color="SSP", facet_col="beta", facet_row="rho")
 
 ##### Fit exponential function to data
-calibration_df[(calibration_df["SSP"] == "SSP1") & (calibration_df["beta"] == "2.0") & (calibration_df["rho"] == "0.65")][["carbonbudget", "consumptionLoss1"]].values
-calibration_indexed = calibration_df.set_index(['SSP', 'beta', 'rho', 'carbonbudget'])[['consumptionLoss1']]
+#calibration_df[(calibration_df["SSP"] == "SSP1") & (calibration_df["beta"] == "2.0") & (calibration_df["rho"] == "0.65")][["carbonbudget", "consumptionLoss1"]].values
+calibration_indexed = calibration_df.set_index(['SSP', 'beta', 'rho', 'carbonbudget'])[['consumptionLoss2']]
 
 
 def f(x, a, b):
@@ -140,7 +138,8 @@ for SSP in ['SSP1','SSP2','SSP3','SSP4','SSP5']:
             }
 
 gamma_values_df = pd.DataFrame(gamma_values).T.rename_axis(['SSP', 'beta', 'rho']).reset_index()
-gamma_values_df.to_csv("carbontaxdamages/data/gamma_values.csv", index=False)
+gamma_values_df.to_csv("carbontaxdamages/data/gamma_values2.csv", index=False)
+
 
 
 def test_plot(SSP, beta, rho):
@@ -159,7 +158,7 @@ def test_plot(SSP, beta, rho):
         go.Scatter(x=xvals, y=factor_low * f(xvals, *coeffs), name='Low'),
         go.Scatter(x=xvals, y=factor_high * f(xvals, *coeffs), name='High')
     ]).show()
-test_plot('SSP5', '2.0', '0.65')
+test_plot('SSP5', '3.0', '0.95')
 
 ######
 # Without damages: calibrate, using beta=2.0
