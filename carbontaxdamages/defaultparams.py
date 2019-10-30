@@ -34,7 +34,7 @@ class Params:
             K_min = 0, K_max = 3000,
 
             p_values_num = 1000,
-            p_values_max = 1.5 * 1500.0,
+            p_values_max_rel = 1.5,
 
             T = 85,
             t_values_num = int(85/5),

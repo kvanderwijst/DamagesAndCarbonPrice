@@ -108,6 +108,7 @@ def full_run(params_input):
     ### Data should be accessed as array[CE_i, E_i, K_i]
     CE_values_3d, E_values_3d, K = np.meshgrid(CE_values, E_values, K_values, indexing='ij')
 
+    p_values_max = p_values_max_rel * gamma
     p_values = np.linspace(0, params.p_values_max, params.p_values_num)
 
     population_values = population(t_values_years, params.SSP)
