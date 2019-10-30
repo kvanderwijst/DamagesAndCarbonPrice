@@ -80,7 +80,7 @@ controlpanel.create_group(
 experiment_select = dcc.Dropdown(
     id="experiment-dropdown",
     options=[{
-        'label': x.title(),
+        'label': x,
         'value': x
         } for x in list(outputs.keys())
     ],
@@ -311,7 +311,7 @@ def create_plots(experiment, picks):
 def refresh_experiments(n, value, n_old):
     load_all()
     return ([{
-        'label': x.title(),
+        'label': x,
         'value': x
         } for x in list(outputs.keys())
     ], *perform_update_experiments(value))
