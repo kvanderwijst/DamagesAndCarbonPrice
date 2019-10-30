@@ -109,7 +109,7 @@ def full_run(params_input):
     CE_values_3d, E_values_3d, K = np.meshgrid(CE_values, E_values, K_values, indexing='ij')
 
     p_values_max = params.p_values_max_rel * gamma
-    p_values = np.linspace(0, params.p_values_max, params.p_values_num)
+    p_values = np.linspace(0, p_values_max, params.p_values_num)
 
     population_values = population(t_values_years, params.SSP)
     GDP_values = GDP(t_values_years, params.SSP)
