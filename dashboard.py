@@ -30,7 +30,7 @@ def load_all():
     if len(filenames) == 0:
         raise Exception("No files match the given pattern.")
 
-    p_experiment = re.compile('.*(experiment_[a-zA-Z0-9]+)_')
+    p_experiment = re.compile('.*(experiment_[a-zA-Z0-9-]+)_')
     colors = plotly.colors.DEFAULT_PLOTLY_COLORS * 3
 
     outputs.clear()
