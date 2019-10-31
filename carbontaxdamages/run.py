@@ -95,6 +95,7 @@ def full_run(params_input):
     if params.useCalibratedExogLearningRate:
         total_abatement = B_cumulative(-1) - absoluteBudget
         exogLearningRate = (total_abatement / 38.8 + 1) ** (-np.log2(params.progRatio)/T) - 1
+        exogLearningRate = np.round(exogLearningRate, 5)
         progRatio = 1.0
         params_input.default_params['exogLearningRate'] = exogLearningRate
         params_input.default_params['progRatio'] = progRatio
