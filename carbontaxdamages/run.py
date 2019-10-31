@@ -168,7 +168,7 @@ def full_run(params_input):
     def learningFactor(t_i, CE):
         Q = (B_cumulative(t_i) - CE) / 38.8
         LBD_factor = (np.maximum(0.0, Q) + 1.0) ** np.log2(progRatio)
-        LoT_factor = 1.0 / (1.0 + exogLearningRate) ** t
+        LoT_factor = 1.0 / (1.0 + exogLearningRate) ** t_values[t_i]
         return LBD_factor * LoT_factor
 
     @nb.njit([ f8(i8,f8,f8) ], fastmath=fastmath)
