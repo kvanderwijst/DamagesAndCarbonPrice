@@ -23,6 +23,11 @@ class Params:
             relativeBudget = False,
 
             progRatio = 0.82,
+            exogLearningRate = 0.0,
+
+            # If True, use progRatio to calculate corresponding exog learning rate.
+            # The endogenous learning (LBD) is then ignored
+            useCalibratedExogLearningRate = False,
             minEmissions = -300,
             maxReductParam = 0.05 +100,
 

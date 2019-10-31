@@ -89,6 +89,19 @@ def full_run(params_input):
     else:
         gamma = params.gamma
 
+
+    # Obtain corresponding exogenous learning rate:
+    # NOTE: only works in cost-effectiveness setting, with carbon budget
+    if params.useCalibratedExogLearningRate:
+        total_abatement = B_cumulative(-1) - absoluteBudget
+        exogLearningRate = (total_abatement / 38.8 + 1) ** (-np.log2(params.progRatio)/T) - 1
+        progRatio = 1.0
+        params_input.default_params['exogLearningRate'] = exogLearningRate
+        params_input.default_params['progRatio'] = progRatio
+    else:
+        progRatio = params.progRatio
+        exogLearningRate = params.exogLearningRate
+
     CE_min, CE_max = 0, B_cumulative(-1)
     CE_factor = (params.CE_values_num - 1.0) / (CE_max - CE_min)
     CE_values = np.linspace(CE_min, CE_max, params.CE_values_num)
@@ -154,7 +167,9 @@ def full_run(params_input):
     @nb.njit([ f8(i8,f8) ], fastmath=fastmath)
     def learningFactor(t_i, CE):
         Q = (B_cumulative(t_i) - CE) / 38.8
-        return (np.maximum(0.0, Q) + 1.0) ** np.log2(params.progRatio)
+        LBD_factor = (np.maximum(0.0, Q) + 1.0) ** np.log2(progRatio)
+        LoT_factor = 1.0 / (1.0 + exogLearningRate) ** t
+        return LBD_factor * LoT_factor
 
     @nb.njit([ f8(i8,f8,f8) ], fastmath=fastmath)
     def abatementCosts(t_i, CE, p):
