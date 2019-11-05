@@ -28,7 +28,7 @@ class Params:
             # If True, use progRatio to calculate corresponding exog learning rate.
             # The endogenous learning (LBD) is then ignored
             useCalibratedExogLearningRate = False,
-            minEmissions = -300,
+            minEmissions = -20, # Default is at most 20 GtCO2/yr net negative emissions
             maxReductParam = 0.05 +100,
 
             CE_values_num = 800,
