@@ -42,7 +42,7 @@ class Params:
             p_values_max_rel = 1.5,
 
             T = 85,
-            t_values_num = int(85/5),
+            t_values_num = int(85/5)+1,
 
             T0 = 0.909, # Temperature in 2010
             TCRE = 0.62e-3, # degC / GtCO2
