@@ -129,6 +129,12 @@ def full_run(params_input):
     GDP_values = GDP(t_values_years, params.SSP)
     TFP_values = np.zeros_like(GDP_values)
 
+    if params.discountRateFromGrowth:
+        r_values = growth_rate(t_values_years, params.SSP)
+        params_input.default_params['r'] = 'growthRate'
+    else:
+        r_values = np.ones_like(GDP_values) * params.r
+
     J = np.zeros((params.t_values_num+1, params.CE_values_num, params.E_values_num, params.K_values_num))
     pStar = np.zeros_like(J)
 

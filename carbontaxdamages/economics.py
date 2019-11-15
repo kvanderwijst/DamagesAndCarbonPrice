@@ -179,4 +179,25 @@ def gamma_val(SSP, beta, rho, cost_level):
 
 
 
+###########################
+##
+## Minimum discount rate: pure per capita economic growth rate
+##
+###########################
+
+def annual_growth_rates(data, years):
+    return (data[1:] - data[:-1]) / data[:-1]
+
+def growth_rates_GDP_per_capita(SSP, years):
+    GDP_per_capita = GDP(years, SSP) / population(years, SSP)
+    return annual_growth_rates(GDP_per_capita, years)
+
+growth_rates_extended = {SSP: growth_rates_GDP_per_capita(SSP, np.concatenate([extended_years, [extended_years[-1]]])) for SSP in GDP_data.keys()}
+
+def growth_rate(year, SSP):
+    return np.interp(year, extended_years, growth_rates_extended[SSP])
+
+
+
+
 #
