@@ -6,7 +6,10 @@ import numpy as np
 import numba as nb
 import pandas as pd
 
-import importlib.resources as pkg_resources
+try:
+    import importlib_resources as pkg_resources
+except:
+    import importlib.resources as pkg_resources
 import carbontaxdamages.data
 
 f8 = nb.float64
