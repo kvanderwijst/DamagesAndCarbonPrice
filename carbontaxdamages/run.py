@@ -245,7 +245,8 @@ def full_run(params_input):
             consumption = Y - investments_gross - (1-savingsRate) * abatement
 
             # Goal is to maximize net present value of consumption
-            NPV = np.exp(-params.r * t) * consumption
+            NPV = np.exp(-r_values[t_i] * t) * consumption
+
 
             K_next = (1-dk)**dt * K + dt * investments
 
