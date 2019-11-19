@@ -245,6 +245,11 @@ def create_economic_plots(outputs):
         fig.add_trace(trace, 1, 1)
     for trace in economic_traces(outputs, 'consumption', 'solid', True):
         fig.add_trace(trace, 1, 1)
+    try:
+        for trace in economic_traces(outputs, 'utility', 'dash', True):
+            fig.add_trace(trace, 1, 1)
+    except:
+        print('No utility available')
     for trace in economic_traces(outputs, 'investments', 'dashdot'):
         fig.add_trace(trace, 1, 1)
     for trace in economic_traces(outputs, 'K', 'dash'):
