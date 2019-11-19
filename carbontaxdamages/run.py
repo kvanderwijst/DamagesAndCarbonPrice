@@ -206,7 +206,7 @@ def full_run(params_input):
     ##########################
     ##########################
 
-    @nb.njit(nb.types.UniTuple(f8,10)(f8,i8,f8,f8,f8, f8,nb.boolean, f8_1d))
+    @nb.njit(nb.types.UniTuple(f8,11)(f8,i8,f8,f8,f8, f8,nb.boolean, f8_1d))
     def economicModule(t, t_i, CE, E, K, p, calibrate, TFP_values):
 
         alpha = 0.3             # Power in Cobb-Douglas production function
@@ -247,19 +247,19 @@ def full_run(params_input):
 
             # Utility (equal to log of per capita consumption):
             # (DICE uses population in millions, consumption in )
-            utility = ((consumption * 1000 / L) ** ( (1-params.elasmu)-1 )) / (1-params.elasmu) - 1
+            utility = ((consumption * 1000 / L) ** ( (1-params.elasmu) ) - 1) / (1-params.elasmu) - 1
 
             NPV = utility * L * np.exp(-r_values[t_i] * t)
 
-            #NPV = np.exp(-r_values[t_i] * t) * consumption
+            # NPV = np.exp(-r_values[t_i] * t) * consumption
 
 
             K_next = (1-dk)**dt * K + dt * investments
 
         if calibrate:
-            return TFP, K_next, temperature, Y_gross, damageFraction, investments, consumption, TFP, Y, utility
+            return TFP, K_next, temperature, Y_gross, damageFraction, investments, consumption, TFP, Y, utility, L
 
-        return NPV, K_next, temperature, Y_gross, damageFraction, investments, consumption, TFP, Y, utility
+        return NPV, K_next, temperature, Y_gross, damageFraction, investments, consumption, TFP, Y, utility, L
 
 
     ### Calibrate the TFP such that GDP matches SSP GDP
@@ -336,7 +336,7 @@ def full_run(params_input):
 
         for p in p_values:
             E_next, CE_next = f(t_i, CE, E, p)
-            NPV_curr, K_next, _, _, _, _, _, _, _, _ = economicModule(t, t_i, CE, E, K, p, False, TFP_values)
+            NPV_curr, K_next, _, _, _, _, _, _, _, _, _ = economicModule(t, t_i, CE, E, K, p, False, TFP_values)
             J_next = -NPV_curr + getValue(CE_next, E_next, K_next, J_t_next)
 
             if i == 0 or J_next < currValue:
@@ -413,6 +413,7 @@ def full_run_structured(params, *args, **kwargs):
         'TFP': rest[:,8],
         'Y': rest[:,9],
         'utility': rest[:,10],
+        'population': rest[:,11],
         'meta': {
             # 'B': B,
             't_values': t_values,
