@@ -3,6 +3,7 @@
 *.html
 *.ipynb
 local_*.py
+experimentsRemote.py
 
 
 # Byte-compiled / optimized / DLL files
