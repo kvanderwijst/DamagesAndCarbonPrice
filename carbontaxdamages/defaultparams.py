@@ -48,6 +48,7 @@ class Params:
             TCRE = 0.62e-3, # degC / GtCO2
 
             r = 0.05,
+            elasmu = 1.45,
             discountRateFromGrowth = False,
 
             SSP = 'SSP2',
