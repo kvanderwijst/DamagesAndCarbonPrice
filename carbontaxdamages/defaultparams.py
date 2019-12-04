@@ -50,6 +50,7 @@ class Params:
             r = 0.05,
             elasmu = 1.45,
             discountRateFromGrowth = False,
+            discountFunction = None,
 
             SSP = 'SSP2',
             K_start = 223.0,
