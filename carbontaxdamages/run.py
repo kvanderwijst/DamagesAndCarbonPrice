@@ -134,7 +134,7 @@ def full_run(params_input):
         params_input.default_params['r'] = params.discountFunction
     elif params.discountRateFromGrowth:
         r_values = growth_rate(t_values_years, params.SSP) + params.r
-        params_input.default_params['r'] = 'growthRatePlus{:.3f}'
+        params_input.default_params['r'] = 'growthRatePlus{:.3f}'.format(params.r)
     else:
         r_values = np.ones_like(GDP_values) * params.r
 
