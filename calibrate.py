@@ -66,7 +66,8 @@ def do_carbonbudget_runs(SSP, rho, beta, gamma):
     carbonbudgets = [0.2, 0.3, 0.4, 0.5]
     for cb in carbonbudgets:
         output = full_run_structured(Params(
-            damage='nodamage',
+            damage='nodamage', progRatio=rho,
+            beta=beta,
             K_values_num=20, CE_values_num=1000, p_values_num=500,
             SSP=SSP, carbonbudget=cb, relativeBudget=True,
             discountRateFromGrowth=False, r=0.05,
