@@ -248,8 +248,10 @@ def create_economic_plots(outputs):
     try:
         for trace in economic_traces(outputs, 'utility', 'dash', True):
             fig.add_trace(trace, 1, 1)
+        for trace in economic_traces(outputs, 'r', 'solid', True):
+            fig.add_trace(trace, 1, 1)
     except:
-        print('No utility available')
+        pass
     for trace in economic_traces(outputs, 'investments', 'dashdot'):
         fig.add_trace(trace, 1, 1)
     for trace in economic_traces(outputs, 'K', 'dash'):
@@ -267,6 +269,7 @@ def create_economic_plots(outputs):
 #         'margin': {'b': 15, 't': 40},
 #         'hovermode': 'x'
 #     })
+
 
 def perform_update_experiments(value):
     options = [{
@@ -323,4 +326,4 @@ def refresh_experiments(n, value, n_old):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8050)
+    app.run_server(debug=False, port=8050)
