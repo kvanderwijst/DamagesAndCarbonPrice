@@ -29,20 +29,28 @@ costs_ar5 = pd.read_csv("../AR5fig6.23.csv").rename(columns={'X-Value': 'x', 'Y-
 costs_ar5['y'] /= 100 # Costs are in percentage points
 costs_ar5_GE = costs_ar5[costs_ar5['ModelType'] == 'GE']
 
-model = smf.quantreg('y ~ x', costs_ar5_GE)
-results = {q: model.fit(q=q) for q in [0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95]}
+## First, perform simple linear regression without constraints:
+aStar, bStar = smf.quantreg('y ~ x', costs_ar5_GE).fit(q=0.5).params[['x', 'Intercept']]
+
+## Then, perform constrained linear regression such that every line intersects
+## the y=0 line at the same point
+def constrained(x):
+    return x + bStar / aStar
+
+model = smf.quantreg('y ~ constrained(x) - 1', costs_ar5_GE) # "-1" removes the intercept variable
+slopes = {q: model.fit(q=q).params['constrained(x)'] for q in [0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95]}
 
 # Create f(x) = a x + b for the 16th, 50th and 84th percentiles
-def f(a, b):
-    return lambda x: a * x + b
-linear_costs = {'p'+str(int(q*100)): f(result.params['x'], result.params['Intercept']) for q, result in results.items() if q in [0.16, 0.5, 0.84]}
+def f(a):
+    return lambda x: a * constrained(x)
+linear_costs = {'p{:02.0f}'.format(q*100): f(slope) for q, slope in slopes.items() if q in [0.05, 0.5, 0.95]}
 
 # Plot:
 
 # x_test = np.linspace(0,0.7,100)
 # go.Figure([go.Scatter(x=costs_ar5_GE['x'], y=costs_ar5_GE['y'], mode='markers')] + [
-#     go.Scatter(x=x_test, y=result.params['x'] * x_test + result.params['Intercept'], name=q)
-#     for q, result in results.items()
+#     go.Scatter(x=x_test, y=linear_cost(x_test), name=q) # result.params['Intercept'
+#     for q, linear_cost in linear_costs.items()
 # ])
 
 
@@ -130,7 +138,7 @@ i = 0
 for SSP in ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']:
     for rho in [0.65, 0.82, 0.95]:
         for beta in [2.0, 3.0]:
-            for cost_percentile, cost_level in [['p16', 'low'], ['p50', 'best'], ['p84', 'high']]:
+            for cost_percentile, cost_level in [['p05', 'p16'], ['p50', 'p50'], ['p95', 'p84']]:
                 # Current value of gamma:
                 current_gamma = gamma_val(SSP, beta, rho, cost_level)
                 print(SSP, rho, beta, cost_percentile, cost_level, current_gamma)
