@@ -126,10 +126,10 @@ def update_gamma(SSP, rho, beta, target_percentile, current_gamma, iteration=1, 
 
 df_gammas = pd.DataFrame(columns=['SSP', 'rho', 'beta', 'cost_percentile', 'gamma'])
 i = 0
-for SSP in ['SSP5']:
-    for rho in [0.65]:
-        for beta in [3.0]:
-            for cost_percentile, cost_level in [['p16', 'low'], ['p84', 'high']]:#[['p16', 'low'], ['p50', 'best'], ['p84', 'high']]:
+for SSP in ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']:
+    for rho in [0.65, 0.82, 0.95]:
+        for beta in [2.0, 3.0]:
+            for cost_percentile, cost_level in [['p16', 'low'], ['p50', 'best'], ['p84', 'high']]:
                 # Current value of gamma:
                 current_gamma = gamma_val(SSP, beta, rho, cost_level)
                 print(SSP, rho, beta, cost_percentile, cost_level, current_gamma)
