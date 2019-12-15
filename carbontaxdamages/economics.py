@@ -171,13 +171,14 @@ damages = {
 ##
 ###########################
 
-gamma_SSP_combined = True
+gamma_SSP_combined = False
 
 calibration_filename = "calibrated_gamma_SSP_combined.csv" if gamma_SSP_combined else "calibrated_gamma.csv"
 
 gamma_values_df = pd.read_csv(pkg_resources.open_text(carbontaxdamages.data, calibration_filename)).fillna('').set_index(['SSP', 'beta', 'rho', 'cost_percentile'])
 
 def gamma_val(SSP, beta, rho, cost_level):
+    SSP = 'SSP2'
     try:
         gamma = gamma_values_df.loc['' if gamma_SSP_combined else SSP, beta, rho, cost_level]['gamma']
     except:
