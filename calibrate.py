@@ -93,7 +93,7 @@ def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.05):
     else:
         SSP_lst = [SSP]
     for SSP in SSP_lst:
-        for cb in [0.15, 0.25, 0.35, 0.45, 0.55]:
+        for cb in [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55]:
             output = full_run_structured(Params(
                 damage='nodamage', progRatio=rho,
                 beta=beta,
@@ -121,7 +121,7 @@ def calc_mult_factor(carbonbudgets, NPVs, percentile):
 all_consumption_losses = pd.DataFrame({'cb': [], 'NPV': [], 'SSP': [], 'rho': [], 'beta': [], 'cost_level': []})
 
 
-def update_gamma(SSP, rho, beta, target_percentile, current_gamma, iteration=1, max_iterations=2):
+def update_gamma(SSP, rho, beta, target_percentile, current_gamma, iteration=1, max_iterations=1):
     # Step (a): do a run for the current scenario, and all carbon budgets,
     # and directly calculate the NPV of consumption loss
     NPVs, carbonbudgets = do_carbonbudget_runs(SSP, rho, beta, current_gamma)
