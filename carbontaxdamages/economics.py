@@ -171,11 +171,15 @@ damages = {
 ##
 ###########################
 
-gamma_values_df = pd.read_csv(pkg_resources.open_text(carbontaxdamages.data, "calibrated_gamma.csv")).set_index(['SSP', 'beta', 'rho', 'cost_percentile'])
+gamma_SSP_combined = True
+
+calibration_filename = "calibrated_gamma_SSP_combined.csv" if gamma_SSP_combined else "calibrated_gamma.csv"
+
+gamma_values_df = pd.read_csv(pkg_resources.open_text(carbontaxdamages.data, calibration_filename)).fillna('').set_index(['SSP', 'beta', 'rho', 'cost_percentile'])
 
 def gamma_val(SSP, beta, rho, cost_level):
     try:
-        gamma = gamma_values_df.loc[SSP, beta, rho, cost_level]['gamma']
+        gamma = gamma_values_df.loc['' if gamma_SSP_combined else SSP, beta, rho, cost_level]['gamma']
     except:
         raise Exception("This combination of parameters has not been calibrated yet: ", SSP, beta, rho, cost_level)
     return gamma

@@ -69,33 +69,6 @@ linear_costs = {'p{:02.0f}'.format(q*100): f(slope) for q, slope in slopes.items
 #
 # This is repeated for each percentile of the costs (16th, 50th and 84th)
 
-def do_carbonbudget_runs(SSP, rho, beta, gamma):
-    outputs = []
-    carbonbudgets = [0.2, 0.3, 0.4, 0.5]
-    for cb in carbonbudgets:
-        output = full_run_structured(Params(
-            damage='nodamage', progRatio=rho,
-            beta=beta,
-            K_values_num=20, CE_values_num=1000, p_values_num=500,
-            SSP=SSP, carbonbudget=cb, relativeBudget=True,
-            discountRateFromGrowth=False, r=0.05,
-            useCalibratedGamma=False, gamma=gamma,
-            runname="calibration %SSP rho %rho beta %beta gamma %gamma r %r CB %carbonbudget",
-            shortname="%SSP %damage %TCRE %cost_level %r"
-        ))
-        outputs.append(output)
-    return outputs, carbonbudgets
-
-def mult_factor(percentile):
-    return lambda x, factor: linear_costs[percentile](x) / factor
-
-def calc_mult_factor(carbonbudgets, NPVs, percentile):
-    # Calculate multiplication factor
-    factor, pcov = scipy.optimize.curve_fit(mult_factor(percentile), carbonbudgets, NPVs)
-    return factor[0]
-
-
-
 
 def baseline_consumption(SSP, t_values_years):
     # Baseline consumption is (100-21)% of baseline GDP
@@ -112,40 +85,90 @@ def consumption_loss(output, SSP, r=0.05):
 
     return npv(consumptionBL - consumption, t_values, r) / npv(consumptionBL, t_values, r)
 
+def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.05):
+    NPVs = []
+    carbonbudgets = []
+    if SSP == "":
+        SSP_lst = ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']
+    else:
+        SSP_lst = [SSP]
+    for SSP in SSP_lst:
+        for cb in [0.15, 0.25, 0.35, 0.45, 0.55]:
+            output = full_run_structured(Params(
+                damage='nodamage', progRatio=rho,
+                beta=beta,
+                K_values_num=20, CE_values_num=1000, p_values_num=500,
+                SSP=SSP, carbonbudget=cb, relativeBudget=True,
+                discountRateFromGrowth=False, r=r,
+                useCalibratedGamma=False, gamma=gamma,
+                runname="calibration %SSP rho %rho beta %beta gamma %gamma r %r CB %carbonbudget",
+                shortname="%SSP %damage %TCRE %cost_level %r"
+            ))
+            consumption_loss_NPV = consumption_loss(output, SSP)
+            NPVs.append(consumption_loss_NPV)
+            carbonbudgets.append(cb)
+    return NPVs, carbonbudgets
+
+def mult_factor(percentile):
+    return lambda x, factor: linear_costs[percentile](x) / factor
+
+def calc_mult_factor(carbonbudgets, NPVs, percentile):
+    # Calculate multiplication factor
+    factor, pcov = scipy.optimize.curve_fit(mult_factor(percentile), carbonbudgets, NPVs)
+    return factor[0]
+
+
+all_consumption_losses = pd.DataFrame({'cb': [], 'NPV': [], 'SSP': [], 'rho': [], 'beta': [], 'cost_level': []})
 
 
 def update_gamma(SSP, rho, beta, target_percentile, current_gamma, iteration=1, max_iterations=2):
-    # Step (a): do a run for the current scenario, and all carbon budgets:
-    outputs, carbonbudgets = do_carbonbudget_runs(SSP, rho, beta, current_gamma)
-    # Step (b): calculate the NPV of the consumption loss for each
-    NPVs = [consumption_loss(output, SSP) for output in outputs]
-    # Step (c): compare this to target consumption losses
+    # Step (a): do a run for the current scenario, and all carbon budgets,
+    # and directly calculate the NPV of consumption loss
+    NPVs, carbonbudgets = do_carbonbudget_runs(SSP, rho, beta, current_gamma)
+    # Step (b): compare this to target consumption losses
     factor = calc_mult_factor(carbonbudgets, NPVs, target_percentile)
-    # Step (d): update gamma
+    # Step (c): update gamma
     gamma = factor * current_gamma
     print('Old:', current_gamma, 'New:', gamma)
     if iteration < max_iterations:
         return update_gamma(SSP, rho, beta, target_percentile, gamma, iteration+1, max_iterations=max_iterations)
     else:
+        # Save consumption losses for future reference
+        global all_consumption_losses
+        all_consumption_losses = all_consumption_losses.append(pd.DataFrame({
+            'cb': carbonbudgets, 'NPV': NPVs,
+            'SSP': SSP, 'rho': rho, 'beta': beta, 'cost_level': target_percentile
+        }))
+        all_consumption_losses.to_csv('calibration_consumption_losses.csv', index=False)
         return gamma
-
-
 
 
 
 df_gammas = pd.DataFrame(columns=['SSP', 'rho', 'beta', 'cost_percentile', 'gamma'])
 i = 0
-for SSP in ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']:
+
+separate_SSP_calibration = False
+if separate_SSP_calibration:
+    SSPs = ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']
+    SSP_name = 'SSP_seperate'
+else:
+    # Each SSP/carbon budget combination will be calculated in the calibration step, instead of separately
+    SSPs = ['']
+    SSP_name = 'SSP_combined'
+
+# for SSP in :
+for SSP in SSPs:
     for rho in [0.65, 0.82, 0.95]:
         for beta in [2.0, 3.0]:
-            for cost_percentile, cost_level in [['p05', 'p16'], ['p50', 'p50'], ['p95', 'p84']]:
+            for cost_percentile, cost_level in [['p05', 'p05'], ['p50', 'p50'], ['p95', 'p95']]:
                 # Current value of gamma:
-                current_gamma = gamma_val(SSP, beta, rho, cost_level)
+                current_gamma = gamma_val(SSP if SSP != '' else 'SSP2', beta, rho, cost_level)
                 print(SSP, rho, beta, cost_percentile, cost_level, current_gamma)
                 new_gamma = update_gamma(SSP, rho, beta, cost_percentile, current_gamma)
                 df_gammas.loc[i] = [SSP, rho, beta, cost_percentile, new_gamma]
-                df_gammas.to_csv('calibrated_gamma.csv', index=False)
+                df_gammas.to_csv('calibrated_gamma_{}.csv'.format(SSP_name), index=False)
                 i += 1
+
 
 
 # calc_mult_factor(test[:,0], test[:,1], 'p50')
