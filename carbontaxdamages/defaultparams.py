@@ -47,10 +47,11 @@ class Params:
             T0 = 0.909, # Temperature in 2010
             TCRE = 0.62e-3, # degC / GtCO2
 
-            r = 0.05,
+            r = 0.015,
             elasmu = 1.45,
-            discountRateFromGrowth = False,
-            discountFunction = None,
+            discountConsumptionFixed = False, # Only used when maximise_utility is False
+
+            maximise_utility = True,
 
             SSP = 'SSP2',
             K_start = 223.0,

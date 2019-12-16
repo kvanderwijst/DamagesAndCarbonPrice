@@ -113,7 +113,8 @@ def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.05):
                 beta=beta,
                 K_values_num=20, CE_values_num=1000, p_values_num=500,
                 SSP=SSP, carbonbudget=cb, relativeBudget=True,
-                discountRateFromGrowth=False, r=r,
+                maximise_utility=False, r=r,
+                discountConsumptionFixed=True,
                 useCalibratedGamma=False, gamma=gamma,
                 runname="calibration %SSP rho %rho beta %beta gamma %gamma r %r CB %carbonbudget",
                 shortname="%SSP %damage %TCRE %cost_level %r"
@@ -172,7 +173,7 @@ else:
 
 # for SSP in :
 for SSP in SSPs:
-    for rho in [0.65, 0.82, 0.95]:
+    for rho in [0.82, 0.65, 0.95]:
         for beta in [2.0, 3.0]:
             for cost_percentile, cost_level in [['p05', 'p05'], ['p50', 'p50'], ['p95', 'p95']]:
                 # Current value of gamma:

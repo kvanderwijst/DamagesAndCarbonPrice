@@ -204,17 +204,5 @@ growth_rates_extended = {SSP: growth_rates_GDP_per_capita(SSP, np.concatenate([e
 def growth_rate(year, SSP):
     return np.interp(year, extended_years, growth_rates_extended[SSP])
 
-#### Other discount functions:
-def discount_linear(r_2010, r_2100, years):
-    return np.maximum(0.0, (r_2100-r_2010) / 90.0 * (years - 2010) + r_2010)
-
-def discount_step(r_begin, r_end, switch_year, years):
-    return np.where(years < switch_year, r_begin, r_end)
-
-discount_functions = {
-    'linear0.03to0.015': lambda years: discount_linear(0.03, 0.015, years),
-    'linear0.03to0.0': lambda years: discount_linear(0.03, 0.0, years),
-    'step0.03to0.0in2075': lambda years: discount_step(0.03, 0.0, 2075, years)
-}
 
 #

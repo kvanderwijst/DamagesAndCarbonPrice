@@ -129,14 +129,13 @@ def full_run(params_input):
     GDP_values = GDP(t_values_years, params.SSP)
     TFP_values = np.zeros_like(GDP_values)
 
-    if params.discountFunction != None:
-        r_values = discount_functions[params.discountFunction](t_values_years)
-        params_input.default_params['r'] = params.discountFunction
-    elif params.discountRateFromGrowth:
-        r_values = growth_rate(t_values_years, params.SSP) + params.r
-        params_input.default_params['r'] = 'growthRatePlus{:.3f}'.format(params.r)
-    else:
+    if params.maximise_utility or params.discountConsumptionFixed:
         r_values = np.ones_like(GDP_values) * params.r
+        if params.discountConsumptionFixed:
+            params_input.default_params['r'] = 'fixed{:.3f}'.format(params.r)
+    else:
+        r_values = params.r + params.elasmu * growth_rate(t_values_years, params.SSP)
+        params_input.default_params['r'] = 'ramsey{:.2f}_{:.3f}'.format(params.elasmu, params.r)
 
     J = np.zeros((params.t_values_num+1, params.CE_values_num, params.E_values_num, params.K_values_num))
     pStar = np.zeros_like(J)
@@ -248,14 +247,18 @@ def full_run(params_input):
             investments = investments_gross - savingsRate * abatement
             consumption = Y - investments_gross - (1-savingsRate) * abatement
 
+            r = r_values[t_i]
+
+            discount_factor = 1.0 / (1 + r)**t
+
             # Utility (equal to log of per capita consumption):
             # (DICE uses population in millions, consumption in )
             utility = ((consumption * 1000 / L) ** ( (1-params.elasmu) ) - 1) / (1-params.elasmu) - 1
 
-            r = r_values[t_i]
-            NPV = utility * L * np.exp(-r * t)
-
-            # NPV = np.exp(-r * t) * consumption
+            if params.maximise_utility:
+                NPV = utility * L * discount_factor
+            else:
+                NPV = consumption * discount_factor
 
 
             K_next = (1-dk)**dt * K + dt * investments
