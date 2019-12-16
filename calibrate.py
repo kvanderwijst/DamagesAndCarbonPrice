@@ -121,7 +121,7 @@ def calc_mult_factor(carbonbudgets, NPVs, percentile):
 all_consumption_losses = pd.DataFrame({'cb': [], 'NPV': [], 'SSP': [], 'rho': [], 'beta': [], 'cost_level': []})
 
 
-def update_gamma(SSP, rho, beta, target_percentile, current_gamma, iteration=1, max_iterations=1):
+def update_gamma(SSP, rho, beta, target_percentile, current_gamma, iteration=1, max_iterations=2):
     # Step (a): do a run for the current scenario, and all carbon budgets,
     # and directly calculate the NPV of consumption loss
     NPVs, carbonbudgets = do_carbonbudget_runs(SSP, rho, beta, current_gamma)
@@ -162,9 +162,14 @@ for SSP in SSPs:
         for beta in [2.0, 3.0]:
             for cost_percentile, cost_level in [['p05', 'p05'], ['p50', 'p50'], ['p95', 'p95']]:
                 # Current value of gamma:
-                current_gamma = gamma_val(SSP if SSP != '' else 'SSP2', beta, rho, cost_level)
+                try:
+                    current_gamma = gamma_val(SSP if SSP != '' else 'SSP2', beta, rho, cost_level)
+                    max_iterations = 2
+                except:
+                    current_gamma = 1000.0
+                    max_iterations = 3
                 print(SSP, rho, beta, cost_percentile, cost_level, current_gamma)
-                new_gamma = update_gamma(SSP, rho, beta, cost_percentile, current_gamma)
+                new_gamma = update_gamma(SSP, rho, beta, cost_percentile, current_gamma, max_iterations=max_iterations)
                 df_gammas.loc[i] = [SSP, rho, beta, cost_percentile, new_gamma]
                 df_gammas.to_csv('calibrated_gamma_{}.csv'.format(SSP_name), index=False)
                 i += 1
