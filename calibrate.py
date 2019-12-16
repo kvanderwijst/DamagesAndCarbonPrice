@@ -29,21 +29,35 @@ costs_ar5 = pd.read_csv("../AR5fig6.23.csv").rename(columns={'X-Value': 'x', 'Y-
 costs_ar5['y'] /= 100 # Costs are in percentage points
 costs_ar5_GE = costs_ar5[costs_ar5['ModelType'] == 'GE']
 
-## First, perform simple linear regression without constraints:
-aStar, bStar = smf.quantreg('y ~ x', costs_ar5_GE).fit(q=0.5).params[['x', 'Intercept']]
+linear = False
 
-## Then, perform constrained linear regression such that every line intersects
-## the y=0 line at the same point
-def constrained(x):
-    return x + bStar / aStar
+if linear:
+    ## First, perform simple linear regression without constraints:
+    aStar, bStar = smf.quantreg('y ~ x', costs_ar5_GE).fit(q=0.5).params[['x', 'Intercept']]
 
-model = smf.quantreg('y ~ constrained(x) - 1', costs_ar5_GE) # "-1" removes the intercept variable
-slopes = {q: model.fit(q=q).params['constrained(x)'] for q in [0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95]}
+    ## Then, perform constrained linear regression such that every line intersects
+    ## the y=0 line at the same point
+    def constrained(x):
+        return x + bStar / aStar
 
-# Create f(x) = a x + b for the 16th, 50th and 84th percentiles
-def f(a):
-    return lambda x: a * constrained(x)
-linear_costs = {'p{:02.0f}'.format(q*100): f(slope) for q, slope in slopes.items() if q in [0.05, 0.5, 0.95]}
+    model = smf.quantreg('y ~ constrained(x) - 1', costs_ar5_GE) # "-1" removes the intercept variable
+    slopes = {q: model.fit(q=q).params['constrained(x)'] for q in [0.05, 0.1, 0.16, 0.5, 0.84, 0.9, 0.95]}
+
+    # Create f(x) = a x + b for the 16th, 50th and 84th percentiles
+    def f(a):
+        return lambda x: a * constrained(x)
+    functions = {'p{:02.0f}'.format(q*100): f(slope) for q, slope in slopes.items() if q in [0.05, 0.5, 0.95]}
+
+else:
+    f1 = lambda x: (x-1)**3
+
+    def f(a):
+        return lambda x: a * f1(x)
+
+    formula = 'y ~ f1(x) - 1'
+    model = smf.quantreg(formula, costs_ar5_GE)
+    functions = {'p{:02.0f}'.format(q*100): f(*model.fit(q=q).params.values) for q in [0.05, 0.5, 0.95]}
+
 
 # Plot:
 
@@ -110,7 +124,7 @@ def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.05):
     return NPVs, carbonbudgets
 
 def mult_factor(percentile):
-    return lambda x, factor: linear_costs[percentile](x) / factor
+    return lambda x, factor: functions[percentile](x) / factor
 
 def calc_mult_factor(carbonbudgets, NPVs, percentile):
     # Calculate multiplication factor
