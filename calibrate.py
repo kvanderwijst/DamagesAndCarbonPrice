@@ -113,7 +113,7 @@ def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.05):
                 beta=beta,
                 K_values_num=20, CE_values_num=1000, p_values_num=500,
                 SSP=SSP, carbonbudget=cb, relativeBudget=True,
-                maximise_utility=False, r=r,
+                maximise_utility=True, r=r,
                 discountConsumptionFixed=True,
                 useCalibratedGamma=False, gamma=gamma,
                 runname="calibration %SSP rho %rho beta %beta gamma %gamma r %r CB %carbonbudget",
