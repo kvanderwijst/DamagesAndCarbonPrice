@@ -341,7 +341,7 @@ def full_run(params_input):
         currValue = 0.0
         best_p = 0.0
 
-        for p in p_values:
+        for p in p_values[::-1]:
             E_next, CE_next = f(t_i, CE, E, p)
             NPV_curr, K_next, _, _, _, _, _, _, _, _, _, _ = economicModule(t, t_i, CE, E, K, p, False, TFP_values)
             J_next = -NPV_curr + getValue(CE_next, E_next, K_next, J_t_next)
