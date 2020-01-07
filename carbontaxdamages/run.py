@@ -349,7 +349,7 @@ def full_run(params_input):
 
             if i == 0 or (J_next < currValue and ((
                             E_next < E + dt * params.maxReductParamPositive
-                        ) or t_i < params.end_of_run_inertia)):
+                        ) or t < params.end_of_run_inertia)):
                 currValue = J_next
                 best_p = p
             i += 1
