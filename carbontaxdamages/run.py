@@ -140,6 +140,11 @@ def full_run(params_input):
     J = np.zeros((params.t_values_num+1, params.CE_values_num, params.E_values_num, params.K_values_num))
     pStar = np.zeros_like(J)
 
+    if params.end_of_run_inertia != None:
+        end_of_run_inertia_t_i = int((params.end_of_run_inertia - 2015)/dt)
+    else:
+        end_of_run_inertia_t_i = len(t_values)
+
 
     ##########################
     ##########################
@@ -196,6 +201,8 @@ def full_run(params_input):
         E_next = B(t_i) * (1 - MACinv(p, factor))
         E_next = np.maximum(E_next, params.minEmissions)
         E_next = np.maximum(E_next, E - dt * params.maxReductParam)
+        if t_i >= end_of_run_inertia_t_i:
+            E_next = np.minimum(E_next, E + dt * params.maxReductParamPositive)
 
         CE_next = CE + dt * E_next
         return E_next, CE_next
@@ -341,12 +348,12 @@ def full_run(params_input):
         currValue = 0.0
         best_p = 0.0
 
-        for p in p_values:
+        for p in p_values[::-1]:
             E_next, CE_next = f(t_i, CE, E, p)
             NPV_curr, K_next, _, _, _, _, _, _, _, _, _, _ = economicModule(t, t_i, CE, E, K, p, False, TFP_values)
             J_next = -NPV_curr + getValue(CE_next, E_next, K_next, J_t_next)
 
-            if i == 0 or J_next < currValue:
+            if i == 0 or (J_next < currValue):# and ((CE_next < CE + 5 * dt) or t < 70)):
                 currValue = J_next
                 best_p = p
             i += 1

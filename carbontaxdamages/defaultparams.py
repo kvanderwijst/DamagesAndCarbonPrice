@@ -30,6 +30,8 @@ class Params:
             useCalibratedExogLearningRate = False,
             minEmissions = -20, # Default is at most 20 GtCO2/yr net negative emissions
             maxReductParam = 0.05 +100,
+            end_of_run_inertia = None,
+            maxReductParamPositive = 2.0,
 
             CE_values_num = 800,
             E_values_num = 2,
