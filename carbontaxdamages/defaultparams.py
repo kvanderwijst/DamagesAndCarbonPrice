@@ -19,7 +19,7 @@ class Params:
             useCalibratedGamma = False,
             cost_level = 'best',
 
-            carbonbudget = 1000, # GtCO2
+            carbonbudget = 0, # GtCO2
             relativeBudget = False,
             budgetYear = 2100,
 

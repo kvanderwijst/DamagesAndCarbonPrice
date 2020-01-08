@@ -366,10 +366,15 @@ def full_run(params_input):
     @nb.njit(nb.types.UniTuple(f8_3d,2)(f8,i8,f8_3d,f8_3d,f8_3d, f8_1d), parallel=True, fastmath=fastmath)
     def calcOptimalPolicy(t, t_i, J_t, J_t_next, pStar_t, TFP_values):
         for CE_i in nb.prange(params.CE_values_num):
+            CE = CE_values[CE_i]
+            if absoluteBudget > 0 and t > (params.budgetYear - params.start_year) and CE > absoluteBudget:
+                penalty = 500. * (CE - absoluteBudget)**3
+            else:
+                penalty = 0.0
             for E_i in range(params.E_values_num):
                 for K_i in range(params.K_values_num):
                     J_val, p_val = calcOptimalPolicy_single(t, t_i, CE_i, E_i, K_i, J_t_next, TFP_values)
-                    J_t[CE_i, E_i, K_i] = J_val
+                    J_t[CE_i, E_i, K_i] = J_val + penalty
                     pStar_t[CE_i, E_i, K_i] = p_val
         return J_t, pStar_t
 
@@ -403,6 +408,7 @@ def full_run(params_input):
     reset()
     if absoluteBudgetOld > 0:
         setPenalty(absoluteBudgetOld)
+    # setPenalty(absoluteBudget)
 
 
     backwardInduction()
