@@ -62,9 +62,12 @@ def full_run(params_input):
 
     if params.relativeBudget:
         absoluteBudget = B_cumulative(-1) * params.carbonbudget
+        absoluteBudgetOld = B_cumulative(-1) * params.carbonbudgetOld
         params_input.default_params['absoluteBudget'] = absoluteBudget
+        params_input.default_params['absoluteBudgetOld'] = absoluteBudgetOld
     else:
         absoluteBudget = params.carbonbudget
+        absoluteBudgetOld = params.carbonbudgetOld
 
     # @nb.njit([ f8(i8) ], fastmath=fastmath)
     # def B(t_i):
@@ -350,7 +353,7 @@ def full_run(params_input):
             if (
                 i == 0 or
                 (J_next < currValue and (
-                    (E_next < E + dt * params.maxReductParamPositive) or t < (params.end_of_run_inertia - params.start_year)
+                    CE_next < absoluteBudget or t < (params.budgetYear - params.start_year) or absoluteBudget <= 0
                 ))
             ):
                 currValue = J_next
@@ -398,8 +401,8 @@ def full_run(params_input):
     calibrateTFP()
 
     reset()
-    if absoluteBudget > 0:
-        setPenalty(absoluteBudget)
+    if absoluteBudgetOld > 0:
+        setPenalty(absoluteBudgetOld)
 
 
     backwardInduction()

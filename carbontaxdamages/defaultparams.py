@@ -21,6 +21,9 @@ class Params:
 
             carbonbudget = 1000, # GtCO2
             relativeBudget = False,
+            budgetYear = 2100,
+
+            carbonbudgetOld = 0,
 
             progRatio = 0.82,
             exogLearningRate = 0.0,
@@ -30,8 +33,6 @@ class Params:
             useCalibratedExogLearningRate = False,
             minEmissions = -20, # Default is at most 20 GtCO2/yr net negative emissions
             maxReductParam = 0.05 +100,
-            end_of_run_inertia = 2200,
-            maxReductParamPositive = 1.7,
 
             CE_values_num = 800,
             E_values_num = 2,
@@ -43,9 +44,9 @@ class Params:
             p_values_num = 1000,
             p_values_max_rel = 1.5,
 
-            T = 80,
+            T = 130,
             start_year = 2020,
-            t_values_num = int(80/5)+1,
+            t_values_num = int(130/5)+1,
 
             T0 = 1.0 + 4 * 0.00062 * 38.8, # Temperature in 2020
             TCRE = 0.62e-3, # degC / GtCO2
