@@ -43,10 +43,11 @@ class Params:
             p_values_num = 1000,
             p_values_max_rel = 1.5,
 
-            T = 85,
-            t_values_num = int(85/5)+1,
+            T = 80,
+            start_year = 2020,
+            t_values_num = int(80/5)+1,
 
-            T0 = 0.909, # Temperature in 2010
+            T0 = 1.0 + 4 * 0.00062 * 38.8, # Temperature in 2020
             TCRE = 0.62e-3, # degC / GtCO2
 
             r = 0.015,

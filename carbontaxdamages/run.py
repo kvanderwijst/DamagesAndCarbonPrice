@@ -37,7 +37,7 @@ def full_run(params_input):
     fastmath = params.fastmath
 
     t_values = np.linspace(0, T, params.t_values_num)
-    t_values_years = 2015 + t_values
+    t_values_years = params.start_year + t_values
     dt = t_values[1] - t_values[0]
 
     ##########################
@@ -222,7 +222,7 @@ def full_run(params_input):
             TFP = TFP_values[t_i]
 
         # Total abatement costs
-        #relativeBaselineToEmissions = 39.5453 # Equal to emissions in MtCO2/yr in 2015
+        #relativeBaselineToEmissions = 39.5453 # Equal to emissions in MtCO2/yr in START YEAR
         abatement = 1e-3 * abatementCosts(t_i, CE, p)
 
         # Current temperature and damages
@@ -350,7 +350,7 @@ def full_run(params_input):
             if (
                 i == 0 or
                 (J_next < currValue and (
-                    (E_next < E + dt * params.maxReductParamPositive) or t < (params.end_of_run_inertia - 2015)
+                    (E_next < E + dt * params.maxReductParamPositive) or t < (params.end_of_run_inertia - params.start_year)
                 ))
             ):
                 currValue = J_next
