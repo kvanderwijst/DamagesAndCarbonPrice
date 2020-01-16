@@ -99,7 +99,7 @@ def consumption_loss(output, SSP, r=0.05):
 
     return npv(consumptionBL - consumption, t_values, r) / npv(consumptionBL, t_values, r)
 
-def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.05):
+def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.015):
     NPVs = []
     carbonbudgets = []
     if SSP == "":
@@ -165,7 +165,7 @@ i = 0
 separate_SSP_calibration = False
 if separate_SSP_calibration:
     SSPs = ['SSP1', 'SSP2', 'SSP3', 'SSP4', 'SSP5']
-    SSP_name = 'SSP_seperate'
+    SSP_name = 'SSP_separate'
 else:
     # Each SSP/carbon budget combination will be calculated in the calibration step, instead of separately
     SSPs = ['']
