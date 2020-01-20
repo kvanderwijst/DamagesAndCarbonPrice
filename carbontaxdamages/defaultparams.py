@@ -57,6 +57,7 @@ class Params:
 
             maximise_utility = True,
 
+            SSP_GDP = 'same', SSP_population='same', SSP_emissions='same',
             SSP = 'SSP2',
             K_start = 223.0,
 

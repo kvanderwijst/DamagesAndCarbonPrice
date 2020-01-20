@@ -47,8 +47,12 @@ def full_run(params_input):
     ##########################
 
 
+    SSP_population = params.SSP if params.SSP_population == 'same' else params.SSP_population
+    SSP_GDP = params.SSP if params.SSP_GDP == 'same' else params.SSP_GDP
+    SSP_emissions = params.SSP if params.SSP_emissions == 'same' else params.SSP_emissions
 
-    B_values = baseline_emissions(t_values_years, params.SSP)
+
+    B_values = baseline_emissions(t_values_years, SSP_emissions)
     B_cumulative_values = dt * np.cumsum(B_values)
 
     @nb.njit([ f8(i8) ], fastmath=fastmath)
@@ -87,7 +91,7 @@ def full_run(params_input):
 
     # Obtain calibrated value of gamma:
     if params.useCalibratedGamma:
-        gamma = gamma_val(params.SSP, params.beta, params.progRatio, params.cost_level)
+        gamma = gamma_val(SSP_GDP, params.beta, params.progRatio, params.cost_level)
         params_input.default_params['gamma'] = gamma
     else:
         gamma = params.gamma
@@ -128,8 +132,8 @@ def full_run(params_input):
     p_values_max = params.p_values_max_rel * gamma
     p_values = np.linspace(0, p_values_max, params.p_values_num)
 
-    population_values = population(t_values_years, params.SSP)
-    GDP_values = GDP(t_values_years, params.SSP)
+    population_values = population(t_values_years, SSP_population)
+    GDP_values = GDP(t_values_years, SSP_GDP)
     TFP_values = np.zeros_like(GDP_values)
 
     if params.maximise_utility or params.discountConsumptionFixed:
@@ -137,7 +141,7 @@ def full_run(params_input):
         if params.discountConsumptionFixed:
             params_input.default_params['r'] = 'fixed{:.3f}'.format(params.r)
     else:
-        r_values = params.r + params.elasmu * growth_rate(t_values_years, params.SSP)
+        r_values = params.r + params.elasmu * growth_rate(t_values_years, SSP_GDP)
         params_input.default_params['r'] = 'ramsey{:.2f}_{:.3f}'.format(params.elasmu, params.r)
 
     J = np.zeros((params.t_values_num+1, params.CE_values_num, params.E_values_num, params.K_values_num))
