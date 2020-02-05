@@ -234,7 +234,11 @@ def full_run(params_input):
 
         # Current temperature and damages
         temperature = params.T0 + params.TCRE * CE
-        damageFraction = (damage(temperature) - damage(params.T0))
+
+        if calibrate:
+            damageFraction = 0.0
+        else:
+            damageFraction = (damage(temperature) - damage(params.T0))
 
         Y_gross = TFP * (L/1e3)**(1-alpha) * K**alpha
         Y = Y_gross * (1-damageFraction)
