@@ -52,13 +52,25 @@ def full_run(params_input):
     SSP_emissions = params.SSP if params.SSP_emissions == 'same' else params.SSP_emissions
 
 
+    population_values = population(t_values_years, SSP_population)
+    GDP_values = GDP(t_values_years, SSP_GDP)
     B_values = baseline_emissions(t_values_years, SSP_emissions)
     B_cumulative_values = dt * np.cumsum(B_values)
 
-    @nb.njit([ f8(i8) ], fastmath=fastmath)
-    def B(t_i):
-        return B_values[t_i]
+    CO2_intensity = B_values / GDP_values
 
+    if params.useBaselineCO2Intensity:
+        @nb.njit([ f8(i8, f8) ], fastmath=fastmath)
+        def B(t_i, Y):
+            if Y <= 0:
+                Y = GDP_values[t_i]
+            return CO2_intensity[t_i] * Y
+    else:
+        @nb.njit([ f8(i8, f8) ], fastmath=fastmath)
+        def B(t_i, Y):
+            return B_values[t_i]
+
+    ### TODO:
     @nb.njit([ f8(i8) ], fastmath=fastmath)
     def B_cumulative(t_i):
         return B_cumulative_values[t_i]
@@ -115,7 +127,7 @@ def full_run(params_input):
     CE_values = np.linspace(CE_min, CE_max, params.CE_values_num)
     dCE = CE_values[1] - CE_values[0]
 
-    E_max, E_min = params.E_max_rel * B(0), params.E_min_rel * B(0)
+    E_max, E_min = params.E_max_rel * B(0,-1), params.E_min_rel * B(0,-1)
     E_factor = (params.E_values_num - 1.0) / (E_max - E_min)
     E_values = np.linspace(E_min, E_max, params.E_values_num)
     dE = E_values[1] - E_values[0]
@@ -132,8 +144,6 @@ def full_run(params_input):
     p_values_max = params.p_values_max_rel * gamma
     p_values = np.linspace(0, p_values_max, params.p_values_num)
 
-    population_values = population(t_values_years, SSP_population)
-    GDP_values = GDP(t_values_years, SSP_GDP)
     TFP_values = np.zeros_like(GDP_values)
 
     if params.maximise_utility or params.discountConsumptionFixed:
@@ -187,20 +197,20 @@ def full_run(params_input):
         LoT_factor = 1.0 / (1.0 + exogLearningRate) ** t_values[t_i]
         return LBD_factor * LoT_factor
 
-    @nb.njit([ f8(i8,f8,f8) ], fastmath=fastmath)
-    def abatementCosts(t_i, CE, p):
+    @nb.njit([ f8(i8,f8,f8,f8) ], fastmath=fastmath)
+    def abatementCosts(t_i, CE, p, Y):
         factor = learningFactor(t_i, CE)
-        return B(t_i) * MACintegral(MACinv(p, factor), factor)
+        return B(t_i, Y) * MACintegral(MACinv(p, factor), factor)
 
     # @nb.njit([ f8(i8,f8,f8) ], fastmath=fastmath)
     # def R(t_i, CE, p):
     #     return abatementCosts(t_i, CE, p) / ((1+params.r)**t)
 
-    @nb.njit([ nb.types.UniTuple(f8,2)(i8,f8,f8,f8) ], fastmath=fastmath)
-    def f(t_i, CE, E, p):
+    @nb.njit([ nb.types.UniTuple(f8,2)(i8,f8,f8,f8,f8) ], fastmath=fastmath)
+    def f(t_i, CE, E, p, Y):
         factor = learningFactor(t_i, CE)
 
-        E_next = B(t_i) * (1 - MACinv(p, factor))
+        E_next = B(t_i, Y) * (1 - MACinv(p, factor))
         E_next = np.maximum(E_next, params.minEmissions)
         E_next = np.maximum(E_next, E - dt * params.maxReductParam)
 
@@ -215,10 +225,15 @@ def full_run(params_input):
     ##########################
     ##########################
 
+
+    alpha = 0.3             # Power in Cobb-Douglas production function
+
+    @nb.njit([ f8(f8,f8,f8,f8) ])
+    def calc_GDP_gross(TFP, L, K, alpha):
+        return TFP * (L/1e3)**(1-alpha) * K**alpha
+
     @nb.njit(nb.types.UniTuple(f8,12)(f8,i8,f8,f8,f8, f8,nb.boolean, f8_1d))
     def economicModule(t, t_i, CE, E, K, p, calibrate, TFP_values):
-
-        alpha = 0.3             # Power in Cobb-Douglas production function
         savingsRate = 0.21      #
         dk = 0.1                # Depreciation of capital
 
@@ -228,9 +243,10 @@ def full_run(params_input):
         else:
             TFP = TFP_values[t_i]
 
+        Y_gross = calc_GDP_gross(TFP, L, K, alpha)
+
         # Total abatement costs
-        #relativeBaselineToEmissions = 39.5453 # Equal to emissions in MtCO2/yr in START YEAR
-        abatement = 1e-3 * abatementCosts(t_i, CE, p)
+        abatement = 1e-3 * abatementCosts(t_i, CE, p, Y_gross)
 
         # Current temperature and damages
         temperature = params.T0 + params.TCRE * CE
@@ -239,8 +255,6 @@ def full_run(params_input):
             damageFraction = 0.0
         else:
             damageFraction = (damage(temperature) - damage(params.T0))
-
-        Y_gross = TFP * (L/1e3)**(1-alpha) * K**alpha
         Y = Y_gross * (1-damageFraction)
 
         # Abatement costs are removed as 21% from investments, rest from consumption
@@ -353,8 +367,9 @@ def full_run(params_input):
         best_p = 0.0
 
         for p in p_values[::-1]:
-            E_next, CE_next = f(t_i, CE, E, p)
             NPV_curr, K_next, _, _, _, _, _, _, _, _, _, _ = economicModule(t, t_i, CE, E, K, p, False, TFP_values)
+            Y = calc_GDP_gross(TFP_values[t_i], population_values[t_i] * 1e-6, K, alpha)
+            E_next, CE_next = f(t_i, CE, E, p, Y)
             J_next = -NPV_curr + getValue(CE_next, E_next, K_next, J_t_next)
 
 
@@ -394,7 +409,7 @@ def full_run(params_input):
                 pStar[t_i,:,:,:] = pStar_t
 
     def forward():
-        CE, E, K = 0, B(0), params.K_start
+        CE, E, K = 0, B(0,-1), params.K_start
         p_path = []
         E_path = []
         rest_all = []
@@ -402,10 +417,12 @@ def full_run(params_input):
             p = getValue(CE, E, K, pStar[t_i])
             p_path.append(p)
             # Next CE:
-            E, CE = f(t_i, CE, E, p)
+            Y = calc_GDP_gross(TFP_values[t_i], population_values[t_i] * 1e-6, K, alpha)
+            E, CE = f(t_i, CE, E, p, Y)
             NPV, K, *rest = economicModule(t, t_i, CE, E, K, p, False, TFP_values=TFP_values)
+            Y = rest[-4]
             E_path.append(E)
-            rest_all.append([B(t_i), CE, K] + rest)
+            rest_all.append([B(t_i,-1), CE, K] + rest)
         print(CE, CE / B_cumulative(-1))
         return p_path, E_path, np.array(rest_all)
 
