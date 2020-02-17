@@ -146,6 +146,15 @@ def damageDICE(T): # DICE-2013R damage function
 def damageTol2014(T):
     return (0.28 * T + 0.16 * T**2) / 100.
 
+@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+def damageBurkePooled(T):
+    shift = 0.8
+    return 0.0 * T + (T > 0.8) * ( 0.326657 * (T-shift) - 0.033932 * (T-shift)**2 )
+
+@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+def damageBurkeDiff(T):
+    shift = 0.8
+    return 0.0 * T + (T > 0.8) * ( 0.1845 * (T-shift) - 0.012336 * (T-shift)**2 )
 
 
 @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
@@ -160,6 +169,8 @@ damages = {
     "damageNewboldMartin2014": damageNewboldMartin2014,
     "damageDICE": damageDICE,
     "damageTol2014": damageTol2014,
+    "damageBurkePooled": damageBurkePooled,
+    "damageBurkeDiff": damageBurkeDiff,
     "nodamage": nodamage
 }
 
