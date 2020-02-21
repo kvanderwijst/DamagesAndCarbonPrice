@@ -5,6 +5,7 @@
 import numpy as np
 import numba as nb
 import pandas as pd
+import scipy
 
 try:
     import importlib_resources as pkg_resources
@@ -118,21 +119,21 @@ def baseline_emissions(year, SSP):
 ##########################
 ##########################
 
-@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
-def damageHowardTotalProductivity(T):
-    return 1.1450 * T**2 / 100.0
+# @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+# def damageHowardTotalProductivity(T):
+#     return 1.1450 * T**2 / 100.0
 
 @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 def damageHowardTotal(T):
     return 1.0038 * T**2 / 100.0
 
-@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
-def damageHowardNonCatastrophic(T):
-    return 0.7438 * T**2 / 100.0
+# @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+# def damageHowardNonCatastrophic(T):
+#     return 0.7438 * T**2 / 100.0
 
-@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
-def damageTol2009(T):
-    return (-2.46*T + 1.1*T**2) / 100.0
+# @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+# def damageTol2009(T):
+#     return (-2.46*T + 1.1*T**2) / 100.0
 
 @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 def damageNewboldMartin2014(T):
@@ -142,35 +143,75 @@ def damageNewboldMartin2014(T):
 def damageDICE(T): # DICE-2013R damage function
     return 0.267 * T**2 / 100.
 
-@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
-def damageTol2014(T):
-    return (0.28 * T + 0.16 * T**2) / 100.
+# @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+# def damageTol2014(T):
+#     return (0.28 * T + 0.16 * T**2) / 100.
 
-@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
-def damageBurkePooled(T):
-    shift = 0.8
-    return 0.0 * T + (T > 0.8) * ( 0.326657 * (T-shift) - 0.033932 * (T-shift)**2 )
-
-@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
-def damageBurkeDiff(T):
-    shift = 0.8
-    return 0.0 * T + (T > 0.8) * ( 0.1845 * (T-shift) - 0.012336 * (T-shift)**2 )
+# @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+# def damageBurkeDiff(T):
+#     shift = 0.8
+#     return 0.0 * T + (T > 0.8) * ( 0.1845 * (T-shift) - 0.012336 * (T-shift)**2 )
 
 
 @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 def nodamage(T):
     return 0.0 * T
 
+
+#### Burke damage functions
+
+def create_interpolated_damagefct(temps_input, dmgs_input):
+    
+    # The input values are not uniformly distributed, so first interpolate them
+    # to create a list of uniformly distributed temperature values
+    temps = np.linspace(temps_input[0], temps_input[-1], len(temps_input))
+    dmgs = scipy.interpolate.interp1d(temps_input, dmgs_input)(temps)
+    
+    @nb.njit(f8(f8), fastmath=True)
+    def interp_damagefct(T):
+        # Boundaries
+        if T <= temps[0]:
+            return dmgs[0]
+        if T >= temps[-1]:
+            return dmgs[-1]
+        
+        # 1D-interpolation
+        dT = temps[1] - temps[0]
+        n = len(temps)
+        
+        T_i = int((T-temps[0]) / dT)
+        weight = (T-temps[T_i]) / dT
+        return (1-weight) * dmgs[T_i] + weight * dmgs[T_i+1]
+    
+    return interp_damagefct
+
+# Import calibrated damage data (see make_Burke_damage_functions.py)
+Burke_damage_data = pd.read_csv(pkg_resources.open_text(carbontaxdamages.data, 'Burke_damages.csv')).set_index(['withlag', 'SSP'])
+damages_Burke_WithLag = {SSP: create_interpolated_damagefct(
+                                    Burke_damage_data.loc[(1, SSP), 'temperature'].values,
+                                    Burke_damage_data.loc[(1, SSP), 'damage'].values
+                        ) for SSP in ['SSP1','SSP2','SSP3','SSP4','SSP5']}
+damages_Burke_NoLag = {SSP: create_interpolated_damagefct(
+                                    Burke_damage_data.loc[(0, SSP), 'temperature'].values,
+                                    Burke_damage_data.loc[(0, SSP), 'damage'].values
+                        ) for SSP in ['SSP1','SSP2','SSP3','SSP4','SSP5']}
+
+
+
+
 damages = {
-    "damageHowardTotalProductivity": damageHowardTotalProductivity,
+    # "damageHowardTotalProductivity": damageHowardTotalProductivity,
     "damageHowardTotal": damageHowardTotal,
-    "damageHowardNonCatastrophic": damageHowardNonCatastrophic,
-    "damageTol2009": damageTol2009,
+    # "damageHowardNonCatastrophic": damageHowardNonCatastrophic,
+    # "damageTol2009": damageTol2009,
     "damageNewboldMartin2014": damageNewboldMartin2014,
     "damageDICE": damageDICE,
-    "damageTol2014": damageTol2014,
-    "damageBurkePooled": damageBurkePooled,
-    "damageBurkeDiff": damageBurkeDiff,
+    "damageBurkeNoLag": damages_Burke_NoLag,
+    "damageBurkeWithLag": damages_Burke_WithLag,
+    # "damageTol2014": damageTol2014,
+    # "damageBurkePooled": damageBurkePooled,
+    # "damageBurkePooledSR": damageBurkePooledSR,
+    # "damageBurkeDiff": damageBurkeDiff,
     "nodamage": nodamage
 }
 

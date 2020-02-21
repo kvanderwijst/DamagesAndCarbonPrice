@@ -34,6 +34,10 @@ def full_run(params_input):
     # ... and a few as variables
     T = params.T
     damage = damages[params.damage]
+    if params.damage == 'damageBurkeWithLag' or params.damage == 'damageBurkeNoLag':
+        # Burke damage functions are SSP specific
+        damage = damage[params.SSP]
+        
     fastmath = params.fastmath
 
     t_values = np.linspace(0, T, params.t_values_num)
