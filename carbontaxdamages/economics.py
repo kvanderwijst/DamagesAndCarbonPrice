@@ -5,7 +5,7 @@
 import numpy as np
 import numba as nb
 import pandas as pd
-import scipy
+import scipy.interpolate
 
 try:
     import importlib_resources as pkg_resources
