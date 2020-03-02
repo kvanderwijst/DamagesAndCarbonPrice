@@ -39,7 +39,7 @@ def full_run(params_input):
         damage = damage[params.SSP]
     if params.damage == 'damageGeneral':
         damage = damage(params.damage_coeff)
-        params_input.default_params['damage'] = '{}{}'.format(params.damage,params.damage_coeff)
+        params_input.default_params['damage'] = '{}{:.7f}'.format(params.damage,params.damage_coeff)
         
     fastmath = params.fastmath
 
