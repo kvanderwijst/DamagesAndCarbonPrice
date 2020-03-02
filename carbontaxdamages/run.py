@@ -4,9 +4,9 @@
 import numpy as np
 import numba as nb
 import scipy.optimize
-from carbontaxdamages.interp import *
-from carbontaxdamages.economics import *
-from carbontaxdamages.defaultparams import *
+from .interp import *
+from .economics import *
+from .defaultparams import *
 from tqdm import tqdm
 import time
 import re
