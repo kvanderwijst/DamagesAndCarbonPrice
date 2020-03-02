@@ -11,7 +11,8 @@ try:
     import importlib_resources as pkg_resources
 except:
     import importlib.resources as pkg_resources
-import carbontaxdamages.data
+
+from . import data as package_data
 
 f8 = nb.float64
 i8 = nb.int64
@@ -123,6 +124,12 @@ def baseline_emissions(year, SSP):
 # def damageHowardTotalProductivity(T):
 #     return 1.1450 * T**2 / 100.0
 
+def damageGeneral(coeff):
+    @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+    def damageGeneralNumba(T):
+        return coeff * T**2
+    return damageGeneralNumba
+
 @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 def damageHowardTotal(T):
     return 1.0038 * T**2 / 100.0
@@ -186,7 +193,7 @@ def create_interpolated_damagefct(temps_input, dmgs_input):
     return interp_damagefct
 
 # Import calibrated damage data (see make_Burke_damage_functions.py)
-Burke_damage_data = pd.read_csv(pkg_resources.open_text(carbontaxdamages.data, 'Burke_damages.csv')).set_index(['withlag', 'SSP'])
+Burke_damage_data = pd.read_csv(pkg_resources.open_text(package_data, 'Burke_damages.csv')).set_index(['withlag', 'SSP'])
 damages_Burke_WithLag = {SSP: create_interpolated_damagefct(
                                     Burke_damage_data.loc[(1, SSP), 'temperature'].values,
                                     Burke_damage_data.loc[(1, SSP), 'damage'].values
@@ -212,6 +219,7 @@ damages = {
     # "damageBurkePooled": damageBurkePooled,
     # "damageBurkePooledSR": damageBurkePooledSR,
     # "damageBurkeDiff": damageBurkeDiff,
+    "damageGeneral": damageGeneral,
     "nodamage": nodamage
 }
 
@@ -227,7 +235,7 @@ gamma_SSP_combined = True
 
 calibration_filename = "calibrated_gamma_SSP_combined.csv" if gamma_SSP_combined else "calibrated_gamma.csv"
 
-gamma_values_df = pd.read_csv(pkg_resources.open_text(carbontaxdamages.data, calibration_filename)).fillna('').set_index(['SSP', 'beta', 'rho', 'cost_percentile'])
+gamma_values_df = pd.read_csv(pkg_resources.open_text(package_data, calibration_filename)).fillna('').set_index(['SSP', 'beta', 'rho', 'cost_percentile'])
 
 def gamma_val(SSP, beta, rho, cost_level):
     try:
