@@ -37,6 +37,9 @@ def full_run(params_input):
     if params.damage == 'damageBurkeWithLag' or params.damage == 'damageBurkeNoLag':
         # Burke damage functions are SSP specific
         damage = damage[params.SSP]
+    if params.damage == 'damageGeneral':
+        damage = damage(params.damage_coeff)
+        params_input.default_params['damage'] = '{}{}'.format(params.damage,params.damage_coeff)
         
     fastmath = params.fastmath
 

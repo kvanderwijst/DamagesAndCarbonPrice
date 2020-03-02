@@ -124,6 +124,12 @@ def baseline_emissions(year, SSP):
 # def damageHowardTotalProductivity(T):
 #     return 1.1450 * T**2 / 100.0
 
+def damageGeneral(coeff):
+    @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+    def damageGeneralNumba(T):
+        return coeff * T**2
+    return damageGeneralNumba
+
 @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 def damageHowardTotal(T):
     return 1.0038 * T**2 / 100.0
@@ -213,6 +219,7 @@ damages = {
     # "damageBurkePooled": damageBurkePooled,
     # "damageBurkePooledSR": damageBurkePooledSR,
     # "damageBurkeDiff": damageBurkeDiff,
+    "damageGeneral": damageGeneral,
     "nodamage": nodamage
 }
 

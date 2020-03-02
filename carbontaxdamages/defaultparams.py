@@ -65,6 +65,7 @@ class Params:
             fastmath = True,
 
             damage = "nodamage",
+            damage_coeff = 0.0, # Only used when damage == 'damageGeneral'
 
             runname = "default",
             shortname = "default"
