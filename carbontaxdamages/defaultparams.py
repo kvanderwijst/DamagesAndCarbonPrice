@@ -22,6 +22,7 @@ class Params:
             carbonbudget = 0, # GtCO2
             relativeBudget = False,
             budgetYear = 2100,
+            noPositiveEmissionsAfterBudgetYear = True,
 
             carbonbudgetOld = 0,
 

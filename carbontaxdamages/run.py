@@ -373,7 +373,14 @@ def full_run(params_input):
         currValue = 0.0
         best_p = 0.0
 
-        for p in p_values[::-1]:
+        if t >= (params.budgetYear - params.start_year) and params.noPositiveEmissionsAfterBudgetYear:
+            # Emissions cannot be positve after budget year
+            p_min = gamma * learningFactor(t_i, CE)
+            p_values_selection = np.concatenate((np.array([p_min]), p_values[p_values > p_min]))
+        else:
+            p_values_selection = p_values
+
+        for p in p_values_selection[::-1]:
             NPV_curr, K_next, _, _, _, _, _, _, _, _, _, _ = economicModule(t, t_i, CE, E, K, p, False, TFP_values)
             Y = calc_GDP_gross(TFP_values[t_i], population_values[t_i] * 1e-6, K, alpha)
             E_next, CE_next = f(t_i, CE, E, p, Y)
