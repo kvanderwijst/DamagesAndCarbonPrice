@@ -97,7 +97,7 @@ def consumption_loss(output, SSP, r=0.05):
 
     t_values = output['meta']['t_values']
 
-    return npv(consumptionBL - consumption, t_values, r) / npv(consumptionBL, t_values, r)
+    return (npv(consumptionBL, t_values, r) - npv(consumption, t_values, r)) / npv(consumptionBL, t_values, r)
 
 def do_carbonbudget_runs(SSP, rho, beta, gamma, r=0.015):
     NPVs = []
