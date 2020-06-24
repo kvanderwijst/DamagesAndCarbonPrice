@@ -84,8 +84,12 @@ def full_run(params_input):
 
 
     if params.relativeBudget:
-        absoluteBudget = B_cumulative(-1) * params.carbonbudget
-        absoluteBudgetOld = B_cumulative(-1) * params.carbonbudgetOld
+        cumulative_until_2100 = np.trapz(
+            baseline_emissions(t_values_years[t_values_years <= 2100], SSP_emissions),
+            x=t_values_years[t_values_years <= 2100]
+        )
+        absoluteBudget = cumulative_until_2100 * params.carbonbudget
+        absoluteBudgetOld = cumulative_until_2100 * params.carbonbudgetOld
         params_input.default_params['absoluteBudget'] = absoluteBudget
         params_input.default_params['absoluteBudgetOld'] = absoluteBudgetOld
     else:
