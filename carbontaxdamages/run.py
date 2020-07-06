@@ -377,7 +377,7 @@ def full_run(params_input):
         currValue = 0.0
         best_p = 0.0
 
-        if t >= (params.budgetYear - params.start_year) and params.noPositiveEmissionsAfterBudgetYear:
+        if t >= (params.budgetYear - params.start_year) and params.noPositiveEmissionsAfterBudgetYear and absoluteBudget > 0:
             # Emissions cannot be positve after budget year
             p_min = gamma * learningFactor(t_i, CE)
             p_values_selection = np.concatenate((np.array([p_min]), p_values[p_values > p_min]))
