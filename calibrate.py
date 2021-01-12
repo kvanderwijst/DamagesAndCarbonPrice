@@ -174,7 +174,7 @@ else:
 # for SSP in :
 for SSP in SSPs:
     for rho in [0.82, 0.65, 0.95]:
-        for beta in [2.0, 3.0]:
+        for beta in [1.0]: #[2.0, 3.0]:
             for cost_percentile, cost_level in [['p05', 'p05'], ['p50', 'p50'], ['p95', 'p95']]:
                 # Current value of gamma:
                 try:

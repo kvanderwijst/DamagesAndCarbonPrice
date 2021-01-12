@@ -134,9 +134,9 @@ def damageGeneral(coeff):
 def damageHowardTotal(T):
     return 1.0038 * T**2 / 100.0
 
-# @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
-# def damageHowardNonCatastrophic(T):
-#     return 0.7438 * T**2 / 100.0
+@nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
+def damageHowardNonCatastrophic(T):
+    return 0.7438 * T**2 / 100.0
 
 # @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 # def damageTol2009(T):
@@ -148,7 +148,8 @@ def damageNewboldMartin2014(T):
 
 @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 def damageDICE(T): # DICE-2013R damage function
-    return 0.267 * T**2 / 100.
+    return 0.236 * T**2 / 100. # DICE 2016R2
+    # return 0.267 * T**2 / 100.
 
 # @nb.njit([ f8(f8), f8_1d(f8_1d) ], fastmath=True)
 # def damageTol2014(T):
@@ -209,7 +210,7 @@ damages_Burke_NoLag = {SSP: create_interpolated_damagefct(
 damages = {
     # "damageHowardTotalProductivity": damageHowardTotalProductivity,
     "damageHowardTotal": damageHowardTotal,
-    # "damageHowardNonCatastrophic": damageHowardNonCatastrophic,
+    "damageHowardNonCatastrophic": damageHowardNonCatastrophic,
     # "damageTol2009": damageTol2009,
     "damageNewboldMartin2014": damageNewboldMartin2014,
     "damageDICE": damageDICE,

@@ -53,7 +53,7 @@ class Params:
             TCRE = 0.62e-3, # degC / GtCO2
 
             r = 0.015,
-            elasmu = 1.45,
+            elasmu = 1.001,
             discountConsumptionFixed = False, # Only used when maximise_utility is False
 
             maximise_utility = True,
