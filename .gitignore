@@ -1,7 +1,7 @@
 # Output files
 *.svg
 *.html
-*.ipynb
+# *.ipynb
 local_*.py
 experimentsRemote.py
 
