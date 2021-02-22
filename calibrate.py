@@ -25,7 +25,7 @@ from carbontaxdamages.economics import *
 ####
 
 #### Step 1: import cost points from Fig 6.23 AR5 WG3
-costs_ar5 = pd.read_csv("../AR5fig6.23.csv").rename(columns={'X-Value': 'x', 'Y-Value': 'y'})
+costs_ar5 = pd.read_csv("data/AR5fig6.23.csv").rename(columns={'X-Value': 'x', 'Y-Value': 'y'})
 costs_ar5['y'] /= 100 # Costs are in percentage points
 costs_ar5_GE = costs_ar5[costs_ar5['ModelType'] == 'GE']
 
