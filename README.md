@@ -6,6 +6,7 @@
 The main data used in the paper is contained in the files:
  - [`output/experiment_allcarbonbudget.csv`](output/experiment_allcarbonbudget.csv)
  - [`output/experiment_allcba.csv`](output/experiment_allcba.csv)
+
 for respectively the carbon budget and the cost-benefit runs. These files are used to create the figures of the paper using the notebooks `2. Cost-effectiveness visualisation.ipynb` and `3. Cost-benefit visualisation.ipynb`.
 
 ## Recreating output files
