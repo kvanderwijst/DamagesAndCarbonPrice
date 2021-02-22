@@ -18,7 +18,14 @@ The above command creates a set of JSON-files containing the output of the IAM. 
 The core of the model is the `carbontaxdamages`-folder:
  - `defaultparams.py`: the default parameters, which can be changed programmatically when running the model with the above command,
  - `economics.py`: the socio-economic data and damage function definitions
- - `run.py`: the main optimisation and Cobb-Douglas routine.
+ - `run.py`: the main optimisation and Cobb-Douglas routine (mainly the function `full_run(...)`, the rest are export functions). In this function, a number of sub-functions are defined:
+   - `economicModule(...)`: given the value of the state variables and a carbon price at time `t`, calculates the discounted utility at the next time step using the Cobb-Douglas production function
+   - `calcOptimalPolicy_single(...)`: given the value of the state variables at time `t` and the optimal discounted utility coming from times `t+1...T` from the backpropagation algorithm, loops over all possible values of the carbon price to calculate the carbon price maximising the discounted utility at time `t`.
+   - `calcOptimalPolicy(...)`: calls `calcOptimalPolicy_single(...)` for each value of the state variables at time `t`.
+   - `backwardInduction(...)`: runs `calcOptimalPolicy(...)` for each timestep from `T` to `0` backwards in time.
+   - `forward()`: once the backward induction step is finished, the model is run forward in time, starting at the initial state variable values to obtain the optimal carbon price path.
+
+The model mainly uses the Numba Python package, compiling Python code to low-level highly efficient code. It is then run in parallel using Numba's automatic parallelisation.
 
 ## Rerun the calibration
 
